@@ -49,4 +49,4 @@ def predict(input_data: PredictionInput):
 if __name__ == "__main__":
     import uvicorn
     import os
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
