@@ -1,7 +1,6 @@
 # Import necessary libraries
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, confloat, conint
-import uvicorn
+from pydantic import BaseModel, conint
 import pandas as pd
 import joblib
 
@@ -15,7 +14,6 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the FastAPI API!"}
-
 
 # Define the input data model using Pydantic
 class PredictionInput(BaseModel):
@@ -49,4 +47,5 @@ def predict(input_data: PredictionInput):
 if __name__ == "__main__":
     import uvicorn
     import os
-    uvicorn.run("app:app", host="0.0.0.0", port=port)
+    port = int(os.environ.get('PORT', 8000))
+    uvicorn.run("API.app:app", host="0.0.0.0", port=port)
