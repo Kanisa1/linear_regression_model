@@ -3,9 +3,11 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, conint
 import pandas as pd
 import joblib
+import os
 
 # Load the trained model
-model = joblib.load('models/best_model.pkl')
+model_path = os.path.join(os.path.dirname(__file__), "models/best_model.pkl")
+model = joblib.load(model_path)
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -27,7 +29,9 @@ class PredictionInput(BaseModel):
     stomach_pain: conint(ge=0, le=1)
     acidity: conint(ge=0, le=1)
     ulcers_on_tongue: conint(ge=0, le=1)
-    # Add more features as necessary
+
+    class Config:
+        extra = "ignore"  # Allow extra fields without error
 
 # Define the prediction endpoint
 @app.post('/predict')
@@ -46,6 +50,5 @@ def predict(input_data: PredictionInput):
 # Run the application
 if __name__ == "__main__":
     import uvicorn
-    import os
     port = int(os.environ.get('PORT', 8000))
-    uvicorn.run("API.app:app", host="0.0.0.0", port=port)
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
