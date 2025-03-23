@@ -1,4 +1,3 @@
-# Import necessary libraries
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, conint
 import pandas as pd
@@ -29,6 +28,11 @@ class PredictionInput(BaseModel):
     stomach_pain: conint(ge=0, le=1)
     acidity: conint(ge=0, le=1)
     ulcers_on_tongue: conint(ge=0, le=1)
+    abdominal_pain: conint(ge=0, le=1)  # Added missing feature
+    abnormal_menstruation: conint(ge=0, le=1)  # Added missing feature
+    acute_liver_failure: conint(ge=0, le=1)  # Added missing feature
+    altered_sensorium: conint(ge=0, le=1)  # Added missing feature
+    anxiety: conint(ge=0, le=1)  # Added missing feature
 
     class Config:
         extra = "ignore"  # Allow extra fields without error

@@ -1,56 +1,85 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 void main() {
-  runApp(const PredictionApp());
+  runApp(MyApp());
 }
 
-class PredictionApp extends StatelessWidget {
-  const PredictionApp({super.key});
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: PredictionScreen(),
+      home: FeedbackScreen(),
     );
   }
 }
 
-class PredictionScreen extends StatefulWidget {
-  PredictionScreen({super.key});
+// Initialize notifications
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
-  @override
-  _PredictionScreenState createState() => _PredictionScreenState();
+void initNotifications() {
+  const AndroidInitializationSettings androidSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings settings = InitializationSettings(
+    android: androidSettings,
+  );
+
+  flutterLocalNotificationsPlugin.initialize(settings);
 }
 
-class _PredictionScreenState extends State<PredictionScreen> {
-  final TextEditingController input1Controller = TextEditingController();
-  final TextEditingController input2Controller = TextEditingController();
-  final TextEditingController input3Controller = TextEditingController();
-  String predictionResult = "";
+void showNotification() async {
+  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    'channel_id',
+    'Feedback Notification',
+    importance: Importance.high,
+    priority: Priority.high,
+  );
 
-  Future<void> fetchPrediction() async {
-    final url = Uri.parse("http://192.168.1.69:8000/predict");
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "input1": double.tryParse(input1Controller.text) ?? 0.0,
-        "input2": double.tryParse(input2Controller.text) ?? 0.0,
-        "input3": double.tryParse(input3Controller.text) ?? 0.0,
-      }),
-    );
+  const NotificationDetails notificationDetails = NotificationDetails(
+    android: androidDetails,
+  );
 
-    if (response.statusCode == 200) {
-      setState(() {
-        predictionResult = jsonDecode(response.body)['prediction'].toString();
-      });
+  await flutterLocalNotificationsPlugin.show(
+    0,
+    'Feedback Submitted',
+    'Thank you for your feedback!',
+    notificationDetails,
+  );
+}
+
+// Feedback Screen
+class FeedbackScreen extends StatefulWidget {
+  @override
+  _FeedbackScreenState createState() => _FeedbackScreenState();
+}
+
+class _FeedbackScreenState extends State<FeedbackScreen> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController messageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    initNotifications(); // Initialize notifications
+  }
+
+  void submitFeedback() {
+    if (nameController.text.isNotEmpty &&
+        emailController.text.isNotEmpty &&
+        messageController.text.isNotEmpty) {
+      showNotification(); // Show push notification
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ThankYouScreen()),
+      );
     } else {
-      setState(() {
-        predictionResult = "Error fetching prediction. Try again.";
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please fill in all fields")),
+      );
     }
   }
 
@@ -58,55 +87,64 @@ class _PredictionScreenState extends State<PredictionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/background.jpg',
-              fit: BoxFit.cover,
-            ),
+          Image.asset(
+            "assets/background.jpg",
+            fit: BoxFit.cover,
           ),
-          Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.5)),
-          ),
-          SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "AI Prediction",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildInputField("Enter Input 1", input1Controller),
-                const SizedBox(height: 10),
-                _buildInputField("Enter Input 2", input2Controller),
-                const SizedBox(height: 10),
-                _buildInputField("Enter Input 3", input3Controller),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: fetchPrediction,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pinkAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 15),
-                  ),
-                  child: const Text(
-                    "Predict",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
-                const SizedBox(height: 20),
                 Text(
-                  predictionResult,
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                  "Get in touch.",
+                  style: TextStyle(fontSize: 28, color: Colors.white),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "We'd love to hear from you! Drop us a message.",
+                  style: TextStyle(color: Colors.white54),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: nameController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: "Your name",
+                    labelStyle: TextStyle(color: Colors.white70),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: emailController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: "Your email",
+                    labelStyle: TextStyle(color: Colors.white70),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: messageController,
+                  style: TextStyle(color: Colors.white),
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    labelText: "Your message",
+                    labelStyle: TextStyle(color: Colors.white70),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: submitFeedback,
+                    child: Text("Submit"),
+                  ),
                 ),
               ],
             ),
@@ -115,21 +153,47 @@ class _PredictionScreenState extends State<PredictionScreen> {
       ),
     );
   }
+}
 
-  Widget _buildInputField(String hint, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white54),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.2),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
-        ),
+// Thank You Screen
+class ThankYouScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            "assets/background.jpg",
+            fit: BoxFit.cover,
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check_circle, color: Colors.pink, size: 50),
+                SizedBox(height: 10),
+                Text(
+                  "Thank you!",
+                  style: TextStyle(fontSize: 24, color: Colors.white),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Your message has been received.",
+                  style: TextStyle(color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text("Go home"),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
