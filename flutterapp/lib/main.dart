@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+// FastAPI endpoint
+const String apiUrl = "https://linear-regression-model-6-pwok.onrender.com";  // Make sure this matches the API URL
 
 void main() {
   runApp(MyApp());
@@ -15,41 +19,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Initialize notifications
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
-void initNotifications() {
-  const AndroidInitializationSettings androidSettings =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  const InitializationSettings settings = InitializationSettings(
-    android: androidSettings,
-  );
-
-  flutterLocalNotificationsPlugin.initialize(settings);
-}
-
-void showNotification() async {
-  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    'channel_id',
-    'Feedback Notification',
-    importance: Importance.high,
-    priority: Priority.high,
-  );
-
-  const NotificationDetails notificationDetails = NotificationDetails(
-    android: androidDetails,
-  );
-
-  await flutterLocalNotificationsPlugin.show(
-    0,
-    'Feedback Submitted',
-    'Thank you for your feedback!',
-    notificationDetails,
-  );
-}
-
 // Feedback Screen
 class FeedbackScreen extends StatefulWidget {
   @override
@@ -61,21 +30,42 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    initNotifications(); // Initialize notifications
-  }
-
-  void submitFeedback() {
+  // Send feedback to FastAPI and get prediction
+  Future<void> submitFeedback() async {
     if (nameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
         messageController.text.isNotEmpty) {
-      showNotification(); // Show push notification
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ThankYouScreen()),
+      // Collect feedback data (replace with your actual input data for prediction)
+      Map<String, dynamic> inputData = {
+        'itching': 1,  // Example input, replace with actual user feedback
+        'skin_rash': 0, // Example input
+        'nodal_skin_eruptions': 1,
+        'continuous_sneezing': 0,
+        'shivering': 0,
+        'chills': 0,
+        'joint_pain': 1,
+        'stomach_pain': 0,
+        'acidity': 1,
+        'ulcers_on_tongue': 0
+      };
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(inputData),
       );
+
+      if (response.statusCode == 200) {
+        final prediction = json.decode(response.body);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ThankYouScreen(prediction: prediction['prediction'])),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to get prediction from server")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Please fill in all fields")),
@@ -157,6 +147,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
 // Thank You Screen
 class ThankYouScreen extends StatelessWidget {
+  final String prediction;
+
+  ThankYouScreen({required this.prediction});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -181,6 +175,12 @@ class ThankYouScreen extends StatelessWidget {
                 Text(
                   "Your message has been received.",
                   style: TextStyle(color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Prediction Result: $prediction",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),

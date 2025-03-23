@@ -1,58 +1,80 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, conint
-import pandas as pd
+import numpy as np
 import joblib
-import os
+import uvicorn
 
 # Load the trained model
-model_path = os.path.join(os.path.dirname(__file__), "best_model.pkl")
-model = joblib.load(model_path)
+model = joblib.load('best_severity_model.pkl')
 
-# Initialize FastAPI app
-app = FastAPI()
+app = FastAPI(title="COVID-19 Severity Prediction API")
 
-# Root endpoint
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the FastAPI API!"}
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust as needed for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Define the input data model using Pydantic
-class PredictionInput(BaseModel):
-    itching: conint(ge=0, le=1)
-    skin_rash: conint(ge=0, le=1)
-    nodal_skin_eruptions: conint(ge=0, le=1)
-    continuous_sneezing: conint(ge=0, le=1)
-    shivering: conint(ge=0, le=1)
-    chills: conint(ge=0, le=1)
-    joint_pain: conint(ge=0, le=1)
-    stomach_pain: conint(ge=0, le=1)
-    acidity: conint(ge=0, le=1)
-    ulcers_on_tongue: conint(ge=0, le=1)
-    abdominal_pain: conint(ge=0, le=1)  # Added missing feature
-    abnormal_menstruation: conint(ge=0, le=1)  # Added missing feature
-    acute_liver_failure: conint(ge=0, le=1)  # Added missing feature
-    altered_sensorium: conint(ge=0, le=1)  # Added missing feature
-    anxiety: conint(ge=0, le=1)  # Added missing feature
+# Define the Pydantic model with constraints
+class PatientData(BaseModel):
+    Fever: conint(ge=0, le=1)
+    Tiredness: conint(ge=0, le=1)
+    Dry_Cough: conint(ge=0, le=1)
+    Difficulty_in_Breathing: conint(ge=0, le=1)
+    Sore_Throat: conint(ge=0, le=1)
+    None_Symptom: conint(ge=0, le=1)
+    Pains: conint(ge=0, le=1)
+    Nasal_Congestion: conint(ge=0, le=1)
+    Runny_Nose: conint(ge=0, le=1)
+    Diarrhea: conint(ge=0, le=1)
+    None_Experiencing: conint(ge=0, le=1)
 
-    class Config:
-        extra = "ignore"  # Allow extra fields without error
+    Age_0_9: conint(ge=0, le=1)
+    Age_10_19: conint(ge=0, le=1)
+    Age_20_24: conint(ge=0, le=1)
+    Age_25_59: conint(ge=0, le=1)
+    Age_60plus: conint(ge=0, le=1)
 
-# Define the prediction endpoint
-@app.post('/predict')
-def predict(input_data: PredictionInput):
+    Gender_Female: conint(ge=0, le=1)
+    Gender_Male: conint(ge=0, le=1)
+    Gender_Transgender: conint(ge=0, le=1)
+
+    Contact_Dont_Know: conint(ge=0, le=1)
+    Contact_No: conint(ge=0, le=1)
+    Contact_Yes: conint(ge=0, le=1)
+
+@app.post("/predict")
+async def predict_severity(data: PatientData):
     try:
-        # Convert input data to DataFrame
-        input_dict = input_data.dict()
-        input_df = pd.DataFrame([input_dict])
+        # Arrange the input in the correct order
+        input_features = np.array([[
+            data.Fever, data.Tiredness, data.Dry_Cough, data.Difficulty_in_Breathing,
+            data.Sore_Throat, data.None_Symptom, data.Pains, data.Nasal_Congestion,
+            data.Runny_Nose, data.Diarrhea, data.None_Experiencing,
+            data.Age_0_9, data.Age_10_19, data.Age_20_24, data.Age_25_59, data.Age_60plus,
+            data.Gender_Female, data.Gender_Male, data.Gender_Transgender,
+            data.Contact_Dont_Know, data.Contact_No, data.Contact_Yes
+        ]])
 
-        # Make prediction
-        prediction = model.predict(input_df)
-        return {"prediction": prediction[0]}
+        # Predict using the best model
+        prediction = model.predict(input_features)
+
+        # Interpret the prediction
+        if prediction[0] <= 1.5:
+            severity = "Mild"
+        elif 1.5 < prediction[0] <= 2.5:
+            severity = "Moderate"
+        else:
+            severity = "Severe"
+
+        return {"Predicted Severity Score": prediction[0], "Severity Level": severity}
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
-# Run the application
 if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get('PORT', 8000))
-    uvicorn.run("app:app", host="0.0.0.0", port=port)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
