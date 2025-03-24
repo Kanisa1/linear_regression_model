@@ -13,13 +13,19 @@ app = FastAPI(title="COVID-19 Severity Prediction API")
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust as needed for production
+    allow_origins=["*"],  # Adjust this in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Define the Pydantic model with constraints
+# ✅ Root route to test if the API is running
+@app.get("/")
+def read_root():
+    return {"message": "COVID-19 Severity Prediction API is running!"}
+
+
+# ✅ Pydantic model defining all required input fields
 class PatientData(BaseModel):
     Fever: conint(ge=0, le=1)
     Tiredness: conint(ge=0, le=1)
@@ -47,11 +53,16 @@ class PatientData(BaseModel):
     Contact_No: conint(ge=0, le=1)
     Contact_Yes: conint(ge=0, le=1)
 
+
+# ✅ Prediction endpoint
 @app.post("/predict")
 async def predict_severity(data: PatientData):
     try:
-        # Arrange the input in the correct order
-        input_features = np.array([[
+        # Print incoming data for debugging (check logs on Render)
+        print("Received data:", data.dict())
+
+        # Prepare input features in the correct order
+        input_features = np.array([[ 
             data.Fever, data.Tiredness, data.Dry_Cough, data.Difficulty_in_Breathing,
             data.Sore_Throat, data.None_Symptom, data.Pains, data.Nasal_Congestion,
             data.Runny_Nose, data.Diarrhea, data.None_Experiencing,
@@ -60,7 +71,7 @@ async def predict_severity(data: PatientData):
             data.Contact_Dont_Know, data.Contact_No, data.Contact_Yes
         ]])
 
-        # Predict using the best model
+        # Run prediction
         prediction = model.predict(input_features)
 
         # Interpret the prediction
@@ -71,10 +82,17 @@ async def predict_severity(data: PatientData):
         else:
             severity = "Severe"
 
-        return {"Predicted Severity Score": prediction[0], "Severity Level": severity}
+        # ✅ Return structured prediction
+        return {
+            "predicted_score": prediction[0],
+            "severity_level": severity
+        }
 
     except Exception as e:
+        print(f"Prediction error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# ✅ Optional: Uvicorn run command for local testing
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
