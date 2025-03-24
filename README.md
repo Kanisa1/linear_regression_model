@@ -1,7 +1,7 @@
 # 🚀 COVID-19 Severity Prediction Model Deployment
 
 ## 🎯 Mission
-The goal of this project is to develop and deploy a machine learning model that predicts the severity level of COVID-19 infection based on patient symptoms and demographic data. The model is accessible via a RESTful API and integrated into a mobile application for real-time predictions.
+The goal of this project is to develop and deploy a machine learning model that predicts the severity level of COVID-19 infection based on patient symptoms and demographic data. The model is accessible via a FASTAPI and integrated into a mobile application for real-time predictions.
 
 ---
 
