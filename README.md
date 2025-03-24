@@ -1,5 +1,8 @@
 # 🚀 COVID-19 Severity Prediction Model Deployment
 
+# link to the video 
+[DEMO VIDEO](https://youtu.be/VutA2LPTF88)
+
 ## 🎯 Mission
 The goal of this project is to develop and deploy a machine learning model that predicts the severity level of COVID-19 infection based on patient symptoms and demographic data. The model is accessible via a FASTAPI and integrated into a mobile application for real-time predictions.
 
@@ -54,7 +57,7 @@ print(f"Predicted Severity Score: {prediction}")
 ## 🖥 API Deployment (FastAPI)
 ### ✅ API Features:
 - **Endpoint:** `/predict`
-- **Public Swagger UI:** [View Swagger Docs](https://linear-regression-model-9-145n.onrender.com/docs)
+- **Public Swagger UI:** [View Swagger Docs](https://linear-regression-model-9-ws06.onrender.com/predict)
 - **CORS Middleware:** Enabled for cross-platform access (Mobile app tested)
 - **Pydantic Validation:** Applied for input data structure
 - **Datatype Constraints:** Enforced on each variable for reliability
@@ -95,7 +98,7 @@ print(f"Predicted Severity Score: {prediction}")
 - **Presenter Camera On**
 - **Clear and Concise within 2 minutes**
 
-✅ **Video Link:** [Demo Video](assets/video_demo.mp4) *(Replace with your video path or YouTube link)*
+✅ **Video Link:** [Demo Video]([assets/video_demo.mp4](https://youtu.be/VutA2LPTF88)) 
 
 ---
 
