@@ -54,7 +54,7 @@ print(f"Predicted Severity Score: {prediction}")
 ## 🖥 API Deployment (FastAPI)
 ### ✅ API Features:
 - **Endpoint:** `/predict`
-- **Public Swagger UI:** [View Swagger Docs](https://linear-regression-model-8-145n.onrender.com/docs)
+- **Public Swagger UI:** [View Swagger Docs](https://linear-regression-model-9-145n.onrender.com/docs)
 - **CORS Middleware:** Enabled for cross-platform access (Mobile app tested)
 - **Pydantic Validation:** Applied for input data structure
 - **Datatype Constraints:** Enforced on each variable for reliability
@@ -79,13 +79,13 @@ print(f"Predicted Severity Score: {prediction}")
 - **Result Display:** Severity level prediction shown on screen
 
 #### 📸 Example Screenshot:
-![home Screenshot](assets/home.jpg)
+![home Screenshot](assets/moderate.jpg.jpg)
 
 ---
-[moderate Screenshot](assets/moderate.jpg)
+![moderate Screenshot](assets/home.jpg)
 
 ---
-[maid Screenshot](assets/maid.jpg)
+![maid Screenshot](assets/maid.jpg)
 
 ## 🎥 Video Demo Highlights
 - **Live Mobile App Prediction**
