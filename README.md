@@ -79,7 +79,9 @@ print(f"Predicted Severity Score: {prediction}")
 - **Result Display:** Severity level prediction shown on screen
 
 #### 📸 Example Screenshot:
-![Mobile App Screenshot](assets/mobile_screenshot.png)
+![home Screenshot](assets/home.jpg)
+[maid Screenshot](assets/maid.jpg)
+[moderate Screenshot](assets/moderate.jpg)
 
 ---
 
