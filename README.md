@@ -80,10 +80,12 @@ print(f"Predicted Severity Score: {prediction}")
 
 #### 📸 Example Screenshot:
 ![home Screenshot](assets/home.jpg)
-[maid Screenshot](assets/maid.jpg)
+
+---
 [moderate Screenshot](assets/moderate.jpg)
 
 ---
+[maid Screenshot](assets/maid.jpg)
 
 ## 🎥 Video Demo Highlights
 - **Live Mobile App Prediction**
