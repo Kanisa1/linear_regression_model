@@ -15,7 +15,7 @@ This project focuses on predicting **COVID-19 severity** (mild, moderate, severe
 
 ### 🗂 Source
 Dataset obtained from **Kaggle - COVID-19 Symptoms and Severity Dataset**:  
-[https://www.kaggle.com/datasets](https://www.kaggle.com/datasets)
+[https://www.kaggle.com/datasets/iamhungundji/covid19-symptoms-checker](https://www.kaggle.com/datasets/iamhungundji/covid19-symptoms-checker)
 
 ### 📈 Meaningful Visualizations Impacting Training
 #### 1. Correlation Heatmap
